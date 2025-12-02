@@ -9,6 +9,24 @@ services:
       - "5678:5678"
     environment:
       - "TZ=${TZ}"
+      - "N8N_HOST=${N8N_HOST}"
+      - "N8N_PROTOCOL=${N8N_PROTOCOL}"
+      - "WEBHOOK_URL=${WEBHOOK_URL}"
+      - "N8N_EDITOR_BASE_URL=${N8N_EDITOR_BASE_URL}"
+      - "N8N_PUSH_BACKEND=${N8N_PUSH_BACKEND}"
+      - "N8N_DIAGNOSTICS_ENABLED=${N8N_DIAGNOSTICS_ENABLED}"
+      - "N8N_SECURE_COOKIE=${N8N_SECURE_COOKIE}"
+      - "N8N_METRICS=${N8N_METRICS}"
     volumes:
       - "./data:/home/node/.n8n"
+    restart: "unless-stopped"
+  cloudflared:
+    image: "cloudflare/cloudflared:latest"
+    container_name: "cloudflared"
+    hostname: "cloudflared"
+    environment:
+      - "TZ=${TZ}"
+    command: tunnel --no-autoupdate run --token ${CLOUDFLARED_TOKEN}
+    depends_on:
+      - "n8n"
     restart: "unless-stopped"
