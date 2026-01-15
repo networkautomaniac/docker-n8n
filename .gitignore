@@ -1,3 +1,4 @@
-configs/
+configs/*
+!configs/task-runners/
 data/
 .env

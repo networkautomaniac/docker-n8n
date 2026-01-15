@@ -17,16 +17,35 @@ services:
       - "N8N_DIAGNOSTICS_ENABLED=${N8N_DIAGNOSTICS_ENABLED}"
       - "N8N_SECURE_COOKIE=${N8N_SECURE_COOKIE}"
       - "N8N_METRICS=${N8N_METRICS}"
+      - "N8N_RUNNERS_ENABLED=${N8N_RUNNERS_ENABLED}"
+      - "N8N_RUNNERS_MODE=${N8N_RUNNERS_MODE}"
+      - "N8N_RUNNERS_BROKER_LISTEN_ADDRESS=${N8N_RUNNERS_BROKER_LISTEN_ADDRESS}"
+      - "N8N_RUNNERS_AUTH_TOKEN=${N8N_RUNNERS_AUTH_TOKEN}"
+      - "N8N_NATIVE_PYTHON_RUNNER=${N8N_NATIVE_PYTHON_RUNNER}"
     volumes:
       - "./data:/home/node/.n8n"
     restart: "unless-stopped"
+
+  task-runners:
+    image: "n8nio/runners:latest"
+    container_name: "task-runners"
+    hostname: "task-runners"
+    environment:
+      - "N8N_RUNNERS_TASK_BROKER_URI=${N8N_RUNNERS_TASK_BROKER_URI}"
+      - "N8N_RUNNERS_AUTH_TOKEN=${N8N_RUNNERS_AUTH_TOKEN}"
+    volumes:
+      - "./configs/task-runners/n8n-task-runners.json:/etc/n8n-task-runners.json"
+    depends_on:
+      - "n8n"
+    restart: "unless-stopped"
+
   cloudflared:
     image: "cloudflare/cloudflared:latest"
     container_name: "cloudflared"
     hostname: "cloudflared"
     environment:
       - "TZ=${TZ}"
-    command: tunnel --no-autoupdate run --token ${CLOUDFLARED_TOKEN}
+    command: "tunnel --no-autoupdate run --token ${CLOUDFLARED_TOKEN}"
     depends_on:
       - "n8n"
     restart: "unless-stopped"
